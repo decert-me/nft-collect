@@ -1,0 +1,74 @@
+# system configuration
+system:
+  env: develop
+  addr: 8888
+
+# pgsql configuration
+pgsql:
+  path: "127.0.0.1"
+  port: "5432"
+  config: ""
+  db-name: "nft_collect"
+  username: "postgres"
+  password: "123456"
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: "info"
+  log-zap: false
+
+# auth configuration
+jwt:
+  signing-key: "Decert"
+  expires-time: 86400
+  issuer: "Decert"
+
+# zap configuration
+zap:
+  level: info
+  format: console
+  prefix: '[nft-collect]'
+  director: log
+  show-line: true
+  encode-level: LowercaseColorLevelEncoder
+  stacktrace-key: stacktrace
+  log-in-console: true
+
+# local configuration
+local:
+  path: 'uploads/file'
+  ipfs: 'uploads/ipfs'
+
+# nft
+nft:
+  ens-rpc: "https://rpc.ankr.com/eth"
+  api-key: ""
+  api-key-backup: ""
+  api-key-pro: ""
+  cache-time: 15
+  logo-path: "assets"
+  def-contract: ["0x37da9ea159f5c95923ccc65ecae857c2584a899a::polygon","0x8cc6517e45db7a0803fef220d9b577326a12033f::eth","0x2723522702093601e6360cae665518c4f63e9da6::bnb"]
+  api-config:
+    - chain: "eth"
+      chain-id: 1
+      api-per-host: "restapi"
+      symbol: "ETH"
+    - chain: "bnb"
+      chain-id: 56
+      api-per-host: "bnbapi"
+      symbol: "BNB"
+    - chain: "polygon"
+      chain-id: 137
+      api-per-host: "polygonapi"
+      symbol: "MATIC"
+    - chain: "arbitrum"
+      chain-id: 42161
+      api-per-host: "arbitrumapi"
+      symbol: "Arbitrum"
+    - chain: "optimism"
+      chain-id: 10
+      api-per-host: "optimismapi"
+      symbol: "Optimism"
+    - chain: "gnosis"
+      chain-id: 100
+      api-per-host: "gnosisapi"
+      symbol: "XDAI"
