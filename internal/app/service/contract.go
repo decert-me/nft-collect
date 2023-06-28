@@ -28,7 +28,7 @@ func ItemFiltrateAndDown(contractMap map[string]struct{}, api config.APIConfig) 
 	for key, _ := range contractMap {
 		addressList = append(addressList, key)
 	}
-	if err = global.DB.Model(&model.Contract{}).Select("contract_address").Where("contract_address IN ? AND Status = 2", addressList).Find(&addressExist).Error; err != nil {
+	if err = global.DB.Model(&model.Contract{}).Select("contract_address").Where("contract_address IN ? AND Status = 2 AND chain = ?", addressList, api.Chain).Find(&addressExist).Error; err != nil {
 		return err
 	}
 	// 待处理 slice

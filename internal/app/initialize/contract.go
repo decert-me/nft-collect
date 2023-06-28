@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// 获取默认NFT合约信息
+// InitNFTContract 获取默认NFT合约信息
 func InitNFTContract() {
 	for _, api := range global.CONFIG.NFT.APIConfig {
 		for _, v := range global.CONFIG.NFT.DefContract {
@@ -17,5 +17,12 @@ func InitNFTContract() {
 			contractMap := map[string]struct{}{strings.ToLower(temp[0]): struct{}{}}
 			service.ItemFiltrateAndDown(contractMap, api)
 		}
+	}
+}
+
+func InitChainName() {
+	global.ChainName = make(map[uint]string)
+	for _, api := range global.CONFIG.NFT.APIConfig {
+		global.ChainName[api.ChainID] = api.Chain
 	}
 }
