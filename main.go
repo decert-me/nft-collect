@@ -16,9 +16,10 @@ func main() {
 	zap.ReplaceGlobals(global.LOG)
 	// 初始化数据库
 	initialize.InitCommonDB()
-	// 初始化缓存
-	initialize.InitCache()
 	// 初始化默认合约
 	initialize.InitNFTContract()
+	// 初始化链名称
+	initialize.InitChainName()
+
 	core.RunWindowsServer()
 }
