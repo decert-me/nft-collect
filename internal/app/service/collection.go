@@ -51,7 +51,7 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 
 	db := global.DB.Model(&model.Collection{}).Select("collection.*,contract.contract_logo").
 		Joins("left join contract ON contract.chain=collection.chain AND contract.contract_address=collection.contract_address").
-		Where("collection.flag", 2).Where("collection.account_address", req.AccountAddress)
+		Where("collection.account_address", req.AccountAddress)
 	if req.Search != "" {
 		db.Where("token_id ILIKE ? OR name ILIKE ?", "%"+req.Search+"%", "%"+req.Search+"%")
 	}
@@ -124,11 +124,11 @@ func GetCollectionByContract(req request.GetCollectionReq) (total int64, res []m
 			wg.Wait()
 		} else {
 			if firstCollection.UpdatedAt.Before(time.Now().Add(-time.Duration(global.CONFIG.NFT.CacheTime) * time.Minute)) {
-				fmt.Println("缓存")
 				wg := new(sync.WaitGroup)
 				wg.Add(2)
 				go addCollectionByContract(wg, req.AccountAddress, "erc721", api, req.ContractAddress)
 				go addCollectionByContract(wg, req.AccountAddress, "erc1155", api, req.ContractAddress)
+				wg.Wait()
 			}
 		}
 	}
@@ -151,60 +151,63 @@ func GetCollectionByContract(req request.GetCollectionReq) (total int64, res []m
 // @description: add collection by ids
 // @param: ids []string, address string
 // @return: err error
-func AddCollection(ids []string, address string, flag int64) (err error) {
+func AddCollection(address string, req request.AddCollectionReq) (err error) {
 	tx := global.DB.Begin()
-	if flag == 2 {
-		idsMap := make(map[string]struct{})
-		for _, id := range ids {
-			if id == "" {
-				continue
-			}
-			raw := tx.Model(&model.Collection{}).Where("id", id).Updates(map[string]interface{}{"flag": 2, "status": 2})
-			if raw.RowsAffected > 0 {
-				var nft model.Collection
-				errNft := tx.Model(&model.Collection{}).Where("id", id).First(&nft).Error
-				if errNft != nil {
-					continue
-				}
-				var idContract string
-				errNFTContract := tx.Model(&model.Contract{}).Select("id").Where("chain", nft.Chain).
-					Where("contract_address", nft.ContractAddress).First(&idContract).Error
-				if errNFTContract != nil {
-					continue
-				}
-				idsMap[idContract] = struct{}{}
-			}
+	// 添加NFT
+	err = tx.Model(&model.Collection{}).
+		Where("chain = ? AND contract_address = ? AND status = 0", req.Chain, req.ContractAddress).
+		Updates(map[string]interface{}{"status": 2}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 隐藏NFT
+	for _, id := range req.HideIDs {
+		if id == "" {
+			continue
 		}
-		if tx.Commit().Error != nil {
-			return err
-		}
-
-		for k, _ := range idsMap {
-			_ = addContractToUser(k, address)
-		}
-	} else if flag == 1 {
-		for _, id := range ids {
-			if id == "" {
-				continue
-			}
-			_ = tx.Model(&model.Collection{}).Where("id", id).Updates(map[string]interface{}{"flag": 1, "status": 1})
-		}
-		if tx.Commit().Error != nil {
+		err = tx.Model(&model.Collection{}).Where("id", id).Updates(map[string]interface{}{"status": 1}).Error
+		if err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
+	// 显示NFT
+	for _, id := range req.ShowIDs {
+		if id == "" {
+			continue
+		}
+		err = tx.Model(&model.Collection{}).Where("id", id).Updates(map[string]interface{}{"status": 2}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	// 添加合约到用户
+	var idContract string
+	errNFTContract := tx.Model(&model.Contract{}).Select("id").Where("chain", req.Chain).
+		Where("contract_address", req.ContractAddress).First(&idContract).Error
+	if errNFTContract != nil {
+		tx.Rollback()
+		return err
+	}
+	_ = addContractToUser(idContract, address)
+	// 更新合约数量
 	updateContractCount(address)
-
-	return nil
+	return tx.Commit().Error
 }
 
 // updateAllCollection
 // @description: update account all collection
 // @param: address string
-func updateAllCollection(address string, uuidList []string, init bool) {
+func updateAllCollection(address string, uuidList []string, init bool, refresh bool) {
 	var count int64
 	db := global.DB.Model(&model.Account{})
-	db.Where("(updated_at < ?) AND total < 100 AND address = ? ", time.Now().Add(-time.Duration(global.CONFIG.NFT.CacheTime)*time.Minute), address)
+	limitTime := time.Now().Add(-time.Duration(global.CONFIG.NFT.CacheTime) * time.Minute)
+	if refresh {
+		limitTime = time.Now().Add(-time.Duration(1) * time.Minute)
+	}
+	db.Where("(updated_at < ?) AND total < 100 AND address = ? ", limitTime, address)
 	err := db.Count(&count).Error
 	if err != nil {
 		global.LOG.Error("error getting", zap.Error(err))
@@ -236,7 +239,10 @@ func updateAllCollection(address string, uuidList []string, init bool) {
 		if err = global.DB.Model(&model.Contract{}).Select("contract_address").Where("id", v).First(&contracts).Error; err != nil {
 			return
 		}
-		if err = global.DB.Model(&model.Collection{}).Where("account_address", address).Where("contract_address", contracts).Updates(map[string]interface{}{"status": 2, "flag": 2}).Error; err != nil {
+		if err = global.DB.Model(&model.Collection{}).Where("account_address", address).
+			Where("contract_address", contracts).
+			Where("status=1").
+			Updates(map[string]interface{}{"status": 2}).Error; err != nil {
 			return
 		}
 	}
@@ -325,7 +331,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 		return nil
 	}
 	// 保存数据
-	if err = global.DB.Model(&model.Collection{}).Omit("status", "flag").Clauses(clause.OnConflict{
+	if err = global.DB.Model(&model.Collection{}).Omit("status").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
 		UpdateAll: true,
 	}).Create(&nft).Error; err != nil {
@@ -422,22 +428,24 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 		if _, ok := contractList[common.HexToAddress(v.ContractAddress)]; !ok {
 			continue
 		}
-		nft = append(nft, model.Collection{Chain: api.Chain, AccountAddress: address, NFTScanOwn: v})
+		nft = append(nft, model.Collection{Chain: api.Chain, AccountAddress: address, NFTScanOwn: v, Status: 2})
 	}
 
 	if len(nft) == 0 {
 		return total, nil
 	}
 	// 保存数据
-	if err = global.DB.Model(&model.Collection{}).Omit("status", "flag").Clauses(clause.OnConflict{
+	if err = global.DB.Model(&model.Collection{}).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
-		UpdateAll: true,
+		DoNothing: true,
 	}).Create(&nft).Error; err != nil {
 		return total, err
 	}
-	if !errFlag {
-		go filtrateNFT(address, &nft, api)
-	}
+	_ = errFlag
+	// 删除非本人NFT
+	//if !errFlag {
+	//	go filtrateNFT(address, &nft, api)
+	//}
 	// get item details
 	temp := make(map[string]struct{})
 	for _, v := range nft {
@@ -496,7 +504,7 @@ func RefreshUserData(address string) (err error) {
 		dealList = contractDefault
 	} else if address != common.HexToAddress("0").String() {
 		dealList = slice.DiffSlice[string](contractDefault, user.ContractIDs)
-		go updateAllCollection(address, dealList, false) // update all collection
+		updateAllCollection(address, dealList, false, true) // update all collection
 	}
 
 	if len(user.ContractIDs) != len(user.Counts) {

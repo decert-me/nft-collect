@@ -7,8 +7,11 @@ type AddContractReq struct {
 }
 
 type AddCollectionReq struct {
-	Flag int64    `json:"flag"`
-	IDs  []string `json:"ids" form:"ids"`
+	ChainID         uint `json:"chain_id" form:"chain_id"`
+	Chain           string
+	ContractAddress string   `json:"contract_address" form:"contract_address"` // 合约地址
+	HideIDs         []string `json:"hide_ids" form:"hide_ids"`
+	ShowIDs         []string `json:"show_ids" form:"show_ids"`
 }
 
 type UpdatedCollectionReq struct {

@@ -72,11 +72,13 @@ func AddCollection(c *gin.Context) {
 	var req request.AddCollectionReq
 	_ = c.ShouldBindJSON(&req)
 	address := c.GetString("address")
-	if len(req.IDs) == 0 || address == "" {
+	req.Chain = global.ChainName[req.ChainID]
+	if address == "" || req.Chain == "" {
 		response.FailWithMessage("Error", c)
 		return
 	}
-	if err := service.AddCollection(req.IDs, address, req.Flag); err != nil {
+
+	if err := service.AddCollection(address, req); err != nil {
 		global.LOG.Error("Error!", zap.Error(err))
 		response.FailWithMessage("Error", c)
 	} else {
@@ -104,6 +106,7 @@ func UpdatedCollection(c *gin.Context) {
 func RefreshUserData(c *gin.Context) {
 	var req request.RefreshUserDataReq
 	_ = c.ShouldBindJSON(&req)
+	req.Address = strings.ToLower(req.Address)
 	if err := service.RefreshUserData(req.Address); err != nil {
 		global.LOG.Error("Error!", zap.Error(err))
 		response.FailWithMessage("Error", c)

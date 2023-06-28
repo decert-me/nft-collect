@@ -23,6 +23,7 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 	if errFirst != nil && errFirst != gorm.ErrRecordNotFound {
 		return res, errFirst
 	}
+	// 获取默认合约
 	var contractDefault []string
 	err = db.Model(&model.ContractDefault{}).Raw("SELECT contract_id FROM contract_default").Scan(&contractDefault).Error
 	if errFirst == gorm.ErrRecordNotFound {
@@ -33,7 +34,7 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 		dealList = contractDefault
 	} else if address != common.HexToAddress("0").String() {
 		dealList = slice.DiffSlice[string](contractDefault, user.ContractIDs)
-		go updateAllCollection(address, dealList, false) // update all collection
+		go updateAllCollection(address, dealList, false, false) // update all collection
 	}
 
 	if len(user.ContractIDs) != len(user.Counts) {
@@ -46,7 +47,7 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 		// TODO 优化
 		var count int64
 		err = db.Model(&model.Collection{}).
-			Raw("SElECT COUNT(1) FROM collection a JOIN contract b ON a.contract_address=b.contract_address AND a.chain=b.chain WHERE b.id = ? AND account_address= ? AND a.flag=2", id, address).
+			Raw("SElECT COUNT(1) FROM collection a JOIN contract b ON a.contract_address=b.contract_address AND a.chain=b.chain WHERE b.id = ? AND account_address= ? AND a.status=2", id, address).
 			Scan(&count).Error
 		contractMap[id] = count
 	}
@@ -121,7 +122,7 @@ func initAccount(address string) (err error) {
 	if err != nil {
 		return err
 	}
-	updateAllCollection(address, uuidList, true)
+	updateAllCollection(address, uuidList, true, false)
 	return err
 }
 
@@ -148,13 +149,13 @@ func updateContractCount(address string) (err error) {
 
 		// TODO: 添加状态 需要确定是否过滤
 		err = db.Model(&model.Collection{}).Where("chain", nftContract.Chain).
-			Where("contract_address", nftContract.ContractAddress).Where("account_address", address).Where("flag", 2).
+			Where("contract_address", nftContract.ContractAddress).Where("account_address", address).
 			Count(&count).Error
 		if err != nil {
 			return err
 		}
 		err = db.Model(&model.Collection{}).Where("chain", nftContract.Chain).
-			Where("contract_address", nftContract.ContractAddress).Where("account_address", address).Where("flag", 2).Where("status", 2).
+			Where("contract_address", nftContract.ContractAddress).Where("account_address", address).Where("status", 2).
 			Count(&countShow).Error
 		if err != nil {
 			return err
