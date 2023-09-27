@@ -15,7 +15,7 @@ func InitAccountRouter(Router *gin.RouterGroup) {
 		accountRouterWithAddr.POST("/own/refreshUserData", v1.RefreshUserData) // refresh user data
 	}
 	{
-		accountRouterWithAuth.GET("/contract/:address", v1.GetCollectionByContract) // Get the NFT data by the Contract
+		accountRouterWithAddr.GET("/contract/:address", v1.GetCollectionByContract) // Get the NFT data by the Contract
 	}
 	{
 		accountRouterWithAuth.POST("/own/collection", v1.AddCollection)        // add collection

@@ -9,6 +9,7 @@ import (
 	"nft-collect/internal/app/utils"
 	"nft-collect/pkg/slice"
 	"strings"
+	"time"
 )
 
 // GetContract
@@ -34,7 +35,10 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 		dealList = contractDefault
 	} else if address != common.HexToAddress("0").String() {
 		dealList = slice.DiffSlice[string](contractDefault, user.ContractIDs)
-		go updateAllCollection(address, dealList, false, false) // update all collection
+		go func() {
+			time.Sleep(5 * time.Second)
+			updateAllCollection(address, dealList, false, false) // update all collection
+		}()
 	}
 
 	if len(user.ContractIDs) != len(user.Counts) {
