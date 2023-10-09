@@ -4,6 +4,11 @@ import (
 	"nft-collect/internal/app/model"
 )
 
+type GetSolanaContractRes struct {
+	model.ContractSolana
+	Count int64 `gorm:"-" json:"count" form:"count"`
+}
+
 type GetContractRes struct {
 	model.Contract
 	Count int64 `gorm:"-" json:"count" form:"count"`

@@ -257,8 +257,8 @@ func updateAllCollection(address string, uuidList []string, init bool, refresh b
 func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string, api config.APIConfig, contract string) (err error) {
 	defer wg.Done()
 	var user model.Account
-	contractList := make(map[common.Address]struct{})
-	contractList[common.HexToAddress(contract)] = struct{}{}
+	contractList := make(map[string]struct{})
+	contractList[contract] = struct{}{}
 	if err = global.DB.Model(&model.Account{}).Select("contract_ids").Where("address", address).First(&user).Error; err != nil {
 		return err
 	}
@@ -267,7 +267,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 		if err = global.DB.Model(&model.Contract{}).Select("contract_address").Where("id", v).First(&contracts).Error; err != nil {
 			return err
 		}
-		contractList[common.HexToAddress(contracts)] = struct{}{}
+		contractList[contracts] = struct{}{}
 	}
 	assetsUrl := fmt.Sprintf("https://%s.nftscan.com/api/v2/account/own/%s?limit=300&erc_type=%s&contract_address=%s", api.APIPreHost, address, erc_type, contract)
 	var cursor string
@@ -316,7 +316,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 		}
 
 		for _, v := range nftScan {
-			if _, ok := contractList[common.HexToAddress(v.ContractAddress)]; !ok {
+			if _, ok := contractList[v.ContractAddress]; !ok {
 				continue
 			}
 			nft = append(nft, model.Collection{Chain: api.Chain, AccountAddress: address, NFTScanOwn: v})
@@ -368,8 +368,8 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 		}
 	}()
 	var user model.Account
-	contractList := make(map[common.Address]struct{})
-	contractList[common.HexToAddress(contract)] = struct{}{}
+	contractList := make(map[string]struct{})
+	contractList[contract] = struct{}{}
 
 	if err = global.DB.Model(&model.Account{}).Select("contract_ids").Where("address", address).First(&user).Error; err != nil {
 		return total, err
@@ -384,7 +384,7 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 		if err = global.DB.Model(&model.Contract{}).Select("contract_address").Where("id", v).First(&contracts).Error; err != nil {
 			return total, err
 		}
-		contractList[common.HexToAddress(contracts)] = struct{}{}
+		contractList[contracts] = struct{}{}
 	}
 	assetsUrl := fmt.Sprintf("https://%s.nftscan.com/api/v2/account/own/all/%s?show_attribute=false", api.APIPreHost, address)
 	//var cursor string
@@ -425,7 +425,7 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 	}
 	total = len(nftScan)
 	for _, v := range nftScan {
-		if _, ok := contractList[common.HexToAddress(v.ContractAddress)]; !ok {
+		if _, ok := contractList[v.ContractAddress]; !ok {
 			continue
 		}
 		nft = append(nft, model.Collection{Chain: api.Chain, AccountAddress: address, NFTScanOwn: v, Status: 2})

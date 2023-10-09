@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	socommon "github.com/blocto/solana-go-sdk/common"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -82,6 +83,10 @@ func IsValidAddress(iaddress interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func IsValidSolanaAddress(address string) bool {
+	return socommon.IsOnCurve(socommon.PublicKeyFromString(address))
 }
 
 // VerifySig 校验签名

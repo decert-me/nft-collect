@@ -54,17 +54,27 @@ func GetCollection(c *gin.Context) {
 }
 
 func GetContract(c *gin.Context) {
-	address := strings.ToLower(c.Param("address"))
+	address := c.Param("address")
 	account := c.GetString("address")
-	if !utils.IsValidAddress(address) {
-		response.FailWithMessage("Param Error", c)
+	if utils.IsValidSolanaAddress(address) {
+		response.OkWithDetailed(nil, "Success", c)
 		return
-	}
-	if list, err := service.GetContract(address, account); err != nil {
-		global.LOG.Error("Error!", zap.Error(err))
-		response.FailWithMessage("Error", c)
+		if list, err := service.GetSolanaContract(address, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(list, "Success", c)
+		}
+	} else if utils.IsValidAddress(address) {
+		address = strings.ToLower(address)
+		if list, err := service.GetContract(address, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(list, "Success", c)
+		}
 	} else {
-		response.OkWithDetailed(list, "Success", c)
+		response.FailWithMessage("地址错误", c)
 	}
 }
 

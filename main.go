@@ -20,6 +20,5 @@ func main() {
 	initialize.InitNFTContract()
 	// 初始化链名称
 	initialize.InitChainName()
-
 	core.RunWindowsServer()
 }
