@@ -56,18 +56,18 @@ func GetCollection(c *gin.Context) {
 func GetContract(c *gin.Context) {
 	address := c.Param("address")
 	account := c.GetString("address")
-	if utils.IsValidSolanaAddress(address) {
-		response.OkWithDetailed(nil, "Success", c)
-		return
-		if list, err := service.GetSolanaContract(address, account); err != nil {
+	if utils.IsValidAddress(address) {
+		address = strings.ToLower(address)
+		if list, err := service.GetContract(address, account); err != nil {
 			global.LOG.Error("Error!", zap.Error(err))
 			response.FailWithMessage("Error", c)
 		} else {
 			response.OkWithDetailed(list, "Success", c)
 		}
-	} else if utils.IsValidAddress(address) {
-		address = strings.ToLower(address)
-		if list, err := service.GetContract(address, account); err != nil {
+	} else if utils.IsValidSolanaAddress(address) {
+		response.OkWithDetailed(nil, "Success", c)
+		return
+		if list, err := service.GetSolanaContract(address, account); err != nil {
 			global.LOG.Error("Error!", zap.Error(err))
 			response.FailWithMessage("Error", c)
 		} else {

@@ -25,8 +25,8 @@ func RegisterTables(db *gorm.DB) {
 		model.Account{},
 		model.ContractDefault{},
 		model.Ens{},
-		model.CollectionSolana{},
-		model.ContractSolana{},
+		//model.CollectionSolana{},
+		//model.ContractSolana{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
