@@ -26,4 +26,5 @@ type GetCollectionRes struct {
 type GetCollection struct {
 	model.Collection
 	ContractLogo string `json:"contract_logo" form:"contract_logo"` // 合约Logo
+	NFTAddress   string `json:"nft_address"`                        // NFT 地址
 }

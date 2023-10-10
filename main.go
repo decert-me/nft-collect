@@ -5,6 +5,7 @@ import (
 	"nft-collect/internal/app/core"
 	"nft-collect/internal/app/global"
 	"nft-collect/internal/app/initialize"
+	"nft-collect/internal/app/service"
 )
 
 func main() {
@@ -20,5 +21,6 @@ func main() {
 	initialize.InitNFTContract()
 	// 初始化链名称
 	initialize.InitChainName()
+	service.Service()
 	core.RunWindowsServer()
 }

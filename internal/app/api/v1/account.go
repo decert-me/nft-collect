@@ -31,25 +31,46 @@ func GetCollectionByContract(c *gin.Context) {
 func GetCollection(c *gin.Context) {
 	var req request.GetCollectionReq
 	_ = c.ShouldBindQuery(&req)
-	req.AccountAddress = strings.ToLower(c.Param("address"))
+	address := c.Param("address")
+
 	account := c.GetString("address")
 	// 检验字段
 	if err := utils.Verify(req.PageInfo, utils.PageSizeLimitVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if total, totalPublic, totalHidden, list, err := service.GetCollection(req, account); err != nil {
-		global.LOG.Error("Error!", zap.Error(err))
-		response.FailWithMessage("Error", c)
+	if utils.IsValidAddress(address) {
+		req.AccountAddress = strings.ToLower(address)
+		if total, totalPublic, totalHidden, list, err := service.GetCollection(req, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(response.GetCollectionRes{
+				List:        list,
+				Total:       total,
+				TotalPublic: totalPublic,
+				TotalHidden: totalHidden,
+				Page:        req.Page,
+				PageSize:    req.PageSize,
+			}, "Success", c)
+		}
+	} else if utils.IsValidSolanaAddress(address) {
+		req.AccountAddress = address
+		if total, totalPublic, totalHidden, list, err := service.GetSolanaCollection(req, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(response.GetCollectionRes{
+				List:        list,
+				Total:       total,
+				TotalPublic: totalPublic,
+				TotalHidden: totalHidden,
+				Page:        req.Page,
+				PageSize:    req.PageSize,
+			}, "Success", c)
+		}
 	} else {
-		response.OkWithDetailed(response.GetCollectionRes{
-			List:        list,
-			Total:       total,
-			TotalPublic: totalPublic,
-			TotalHidden: totalHidden,
-			Page:        req.Page,
-			PageSize:    req.PageSize,
-		}, "Success", c)
+		response.FailWithMessage("地址错误", c)
 	}
 }
 
@@ -65,8 +86,8 @@ func GetContract(c *gin.Context) {
 			response.OkWithDetailed(list, "Success", c)
 		}
 	} else if utils.IsValidSolanaAddress(address) {
-		response.OkWithDetailed(nil, "Success", c)
-		return
+		//response.OkWithDetailed(nil, "Success", c)
+		//return
 		if list, err := service.GetSolanaContract(address, account); err != nil {
 			global.LOG.Error("Error!", zap.Error(err))
 			response.FailWithMessage("Error", c)
@@ -116,11 +137,21 @@ func UpdatedCollection(c *gin.Context) {
 func RefreshUserData(c *gin.Context) {
 	var req request.RefreshUserDataReq
 	_ = c.ShouldBindJSON(&req)
-	req.Address = strings.ToLower(req.Address)
-	if err := service.RefreshUserData(req.Address); err != nil {
-		global.LOG.Error("Error!", zap.Error(err))
-		response.FailWithMessage("Error", c)
-	} else {
+	address := req.Address
+
+	if utils.IsValidAddress(address) {
+		req.Address = strings.ToLower(req.Address)
+		if err := service.RefreshUserData(req.Address); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithMessage("Success", c)
+		}
+	} else if utils.IsValidSolanaAddress(address) {
+		service.RefreshUserDataSolana()
 		response.OkWithMessage("Success", c)
+	} else {
+		response.FailWithMessage("地址错误", c)
 	}
+
 }

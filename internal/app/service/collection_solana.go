@@ -34,12 +34,9 @@ func GetSolanaCollection(req request.GetCollectionReq, account string) (total, t
 	limit := req.PageSize
 	offset := req.PageSize * (req.Page - 1)
 
-	db := global.DB.Model(&model.CollectionSolana{}).Select("collection_solana.*,contract.contract_logo").
-		Joins("left join contract ON contract.chain=collection_solana.chain AND contract.contract_address=collection.contract_address").
-		Where("collection.account_address", req.AccountAddress)
-	if req.Search != "" {
-		db.Where("token_id ILIKE ? OR name ILIKE ?", "%"+req.Search+"%", "%"+req.Search+"%")
-	}
+	db := global.DB.Model(&model.CollectionSolana{}).Select("collection_solana.*,collection_solana.token_address as nft_address,contract_solana.contract_logo,'solana' as chain").
+		Joins("left join contract_solana ON contract_solana.contract_name=collection_solana.collection").
+		Where("collection_solana.minter", req.AccountAddress)
 
 	if req.ContractID != "" {
 		var contract model.ContractSolana
@@ -53,23 +50,28 @@ func GetSolanaCollection(req request.GetCollectionReq, account string) (total, t
 	if err != nil {
 		return
 	}
-	if err = db.Session(&gorm.Session{}).Where("collection.status", 1).Count(&totalHidden).Error; err != nil {
-		return
-	}
-	if err = db.Session(&gorm.Session{}).Where("collection.status", 2).Count(&totalPublic).Error; err != nil {
+	//if err = db.Session(&gorm.Session{}).Where("collection_solana.status", 1).Count(&totalHidden).Error; err != nil {
+	//	return
+	//}
+	if err = db.Session(&gorm.Session{}).Where("collection_solana.status", 0).Count(&totalPublic).Error; err != nil {
 		return
 	}
 
 	if req.Status != 0 {
-		db.Where("collection.status", req.Status)
-	} else if req.AccountAddress != account {
-		db.Where("collection.status", 2)
+		if req.Status == 2 {
+			db.Where("collection_solana.status", 0)
+		} else {
+			db.Where("collection_solana.status", req.Status)
+		}
 	}
+	//} else if req.AccountAddress != account {
+	//	db.Where("collection_solana.status", 2)
+	//}
 
 	if req.Sort != "asc" && req.Sort != "desc" {
 		req.Sort = "desc"
 	}
-	orderBy := fmt.Sprintf("own_timestamp %s", req.Sort)
+	orderBy := fmt.Sprintf("mint_timestamp %s", req.Sort)
 	err = db.Limit(limit).Offset(offset).Order(orderBy).Find(&res).Error
 	if err != nil {
 		return total, totalPublic, totalHidden, res, err

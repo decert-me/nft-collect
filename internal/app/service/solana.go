@@ -8,10 +8,41 @@ import (
 	"gorm.io/gorm/clause"
 	"nft-collect/internal/app/global"
 	"nft-collect/internal/app/model"
+	"sync"
 	"time"
 )
 
+var l sync.Mutex
+
+func RefreshUserDataSolana() {
+	// 查询数据库最新数据
+	var count int64
+	limitTime := time.Now().Add(-time.Duration(1) * time.Minute)
+	if err := global.DB.Model(&model.CollectionSolana{}).Where("updated_at > ?", limitTime).Count(&count).Error; err != nil {
+		return
+	}
+	if count > 0 {
+		return
+	}
+	SolanaGet()
+}
+
+func RefreshUserDataSolanaOld() {
+	// 查询数据库最新数据
+	var count int64
+	limitTime := time.Now().Add(-time.Duration(30) * time.Minute)
+	if err := global.DB.Model(&model.CollectionSolana{}).Where("updated_at > ?", limitTime).Count(&count).Error; err != nil {
+		return
+	}
+	if count > 0 {
+		return
+	}
+	SolanaGet()
+}
+
 func SolanaGet() (err error) {
+	l.Lock()
+	defer l.Unlock()
 	assetsUrl := fmt.Sprintf("https://solanaapi.nftscan.com/api/sol/assets/collection/Decert Badge?show_attribute=false")
 	var cursor string
 	var nft []model.CollectionSolana

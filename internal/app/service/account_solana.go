@@ -9,6 +9,7 @@ import (
 
 // GetSolanaContract 获取 Solana 合约
 func GetSolanaContract(address, account string) (res []response.GetSolanaContractRes, err error) {
+	RefreshUserDataSolanaOld()
 	db := global.DB
 	var user model.Account
 
