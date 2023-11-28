@@ -16,6 +16,7 @@ func GetDefaultContract() (list interface{}, err error) {
 }
 
 func AddDefaultContract(req request.AddDefaultContractReq) (err error) {
+	contractAddress := strings.ToLower(req.ContractAddress)
 	for _, api := range global.CONFIG.NFT.APIConfig {
 		if req.Chain == api.Chain {
 			contractMap := map[string]struct{}{strings.ToLower(req.ContractAddress): struct{}{}}
@@ -24,7 +25,7 @@ func AddDefaultContract(req request.AddDefaultContractReq) (err error) {
 		}
 	}
 	var contractID string
-	err = global.DB.Raw("SELECT id FROM contract WHERE contract_address=? AND chain = ?", req.ContractAddress, req.Chain).Scan(&contractID).Error
+	err = global.DB.Raw("SELECT id FROM contract WHERE contract_address=? AND chain = ?", contractAddress, req.Chain).Scan(&contractID).Error
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,6 @@ func GetCollection(c *gin.Context) {
 	var req request.GetCollectionReq
 	_ = c.ShouldBindQuery(&req)
 	address := c.Param("address")
-
 	account := c.GetString("address")
 	// 检验字段
 	if err := utils.Verify(req.PageInfo, utils.PageSizeLimitVerify); err != nil {

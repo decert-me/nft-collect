@@ -44,9 +44,9 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 	if len(user.ContractIDs) != len(user.Counts) {
 		updateContractCount(address)
 	}
-	// TODO 查询默认合约
 
 	contractMap := make(map[string]int64)
+	// 查询默认合约
 	for _, id := range dealList {
 		// TODO 优化
 		var count int64

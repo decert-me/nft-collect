@@ -207,7 +207,7 @@ func updateAllCollection(address string, uuidList []string, init bool, refresh b
 	if refresh {
 		limitTime = time.Now().Add(-time.Duration(1) * time.Minute)
 	}
-	db.Where("(updated_at < ?) AND total < 100 AND address = ? ", limitTime, address)
+	db.Where("(updated_at < ?) AND address = ? ", limitTime, address)
 	err := db.Count(&count).Error
 	if err != nil {
 		global.LOG.Error("error getting", zap.Error(err))
