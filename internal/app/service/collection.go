@@ -82,9 +82,9 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 	}
 
 	if req.Sort != "asc" && req.Sort != "desc" {
-		req.Sort = "desc"
+		req.Sort = "asc"
 	}
-	orderBy := fmt.Sprintf("own_timestamp %s", req.Sort)
+	orderBy := fmt.Sprintf("mint_timestamp %s", req.Sort)
 	err = db.Limit(limit).Offset(offset).Order(orderBy).Find(&res).Error
 	if err != nil {
 		return total, totalPublic, totalHidden, res, err
@@ -139,7 +139,7 @@ func GetCollectionByContract(req request.GetCollectionReq) (total int64, res []m
 	if err != nil {
 		return total, res, err
 	}
-	err = db.Limit(limit).Offset(offset).Order("own_timestamp desc").Find(&res).Error
+	err = db.Limit(limit).Offset(offset).Order("mint_timestamp asc").Find(&res).Error
 	if err != nil {
 		return total, res, err
 	}
