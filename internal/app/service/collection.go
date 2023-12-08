@@ -435,9 +435,9 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 		return total, nil
 	}
 	// 保存数据
-	if err = global.DB.Model(&model.Collection{}).Clauses(clause.OnConflict{
+	if err = global.DB.Model(&model.Collection{}).Omit("status,flag").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
-		DoNothing: true,
+		UpdateAll: true,
 	}).Create(&nft).Error; err != nil {
 		return total, err
 	}
