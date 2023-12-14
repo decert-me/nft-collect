@@ -8,7 +8,7 @@ import (
 
 func GetEnsRecords(c *gin.Context) {
 	if list, err := service.GetEnsRecords(c, c.Param("q")); err != nil {
-		response.Fail(c)
+		response.OkWithData(nil, c)
 	} else {
 		response.OkWithData(list, c)
 	}
