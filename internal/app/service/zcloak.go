@@ -16,20 +16,31 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		global.LOG.Error("非法请求", zap.String("x-api-key", c.GetHeader("x-api-key")))
 		return errors.New("非法请求")
 	}
-	// 查询合约信息
-	//var contract model.Contract
-	//err = global.DB.Model(&model.Contract{}).Where("contract_address = ?", r.ContractAddress).First(&contract).Error
-	//if err != nil {
-	//	return
-	//}
-	// 查询NFT信息
-
+	// 查询NFT是否存在
+	var collectionRes model.Collection
+	global.DB.
+		Select("id,claim_status").
+		Where("chain = ? AND account_address = ? AND contract_address = ? AND token_id = ?", r.Chain, r.AccountAddress, r.ContractAddress, r.TokenID).
+		First(&collectionRes)
+	// 已经领取，不需要操作
+	if collectionRes.ClaimStatus == 3 {
+		return
+	}
+	if collectionRes.ID != "" && collectionRes.ClaimStatus == 1 {
+		// 改变状态3
+		err = global.DB.Model(&model.Collection{}).Where("id = ?", collectionRes.ID).Update("claim_status", 3).Error
+		if err != nil {
+			return
+		}
+		// 跳出
+		return
+	}
 	// 写入NFT数据
 	collection := model.Collection{
 		Chain:          r.Chain,
 		AccountAddress: r.AccountAddress,
 		Status:         2, // 显示
-		IsZcloak:       true,
+		ClaimStatus:    1,
 		NFTScanOwn: model.NFTScanOwn{
 			ContractAddress: r.ContractAddress,
 			TokenID:         r.TokenID,

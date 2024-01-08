@@ -337,12 +337,25 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	if len(nft) == 0 {
 		return nil
 	}
+	// 查询所有ZCloak证书NFT
+	var zCloakNFT []model.Collection
+	if err = global.DB.Model(&model.Collection{}).Where("chain = ? AND account_address = ? AND status = 1", api.Chain, address).Find(&zCloakNFT).Error; err != nil {
+		return err
+	}
 	// 保存数据
 	if err = global.DB.Model(&model.Collection{}).Omit("status").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
 		UpdateAll: true,
 	}).Create(&nft).Error; err != nil {
 		return err
+	}
+	// 更改ZCloak证书状态
+	for _, v := range nft {
+		for _, z := range zCloakNFT {
+			if v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
+				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Update("status", 3).Error
+			}
+		}
 	}
 	_ = errFlag
 	//if !errFlag {

@@ -9,16 +9,7 @@ type Collection struct {
 	Chain          string `gorm:"column:chain;index:chain_address_contract_token,unique" json:"chain" form:"chain"`                                             // 区块链的简称（eth, bnb, polygon, moonbeam, arbitrum, optimism, platon, avalanche, cronos）
 	AccountAddress string `gorm:"column:account_address;type:char(44);index:chain_address_contract_token,unique" json:"account_address" form:"account_address"` // 资产持有者的地址
 	Status         uint8  `gorm:"default:0;" json:"status" form:"status"`                                                                                       // 显示状态(0:初始状态 1:隐藏 2:显示)
-	IsZcloak       bool   `gorm:"default:false;" json:"is_zcloak"`
-	NFTScanOwn
-}
-
-type CollectionUpdate struct {
-	global.MODEL
-	Chain          string `gorm:"column:chain;index:chain_address_contract_token,unique" json:"chain" form:"chain"`                                             // 区块链的简称（eth, bnb, polygon, moonbeam, arbitrum, optimism, platon, avalanche, cronos）
-	AccountAddress string `gorm:"column:account_address;type:char(44);index:chain_address_contract_token,unique" json:"account_address" form:"account_address"` // 资产持有者的地址
-	Status         uint8  `gorm:"-" json:"status" form:"status"`                                                                                                // 显示状态(1:隐藏 2:显示)
-	IsZcloak       bool   `gorm:"-" json:"is_zcloak"`
+	ClaimStatus    uint8  `gorm:"claim_status;default:1" json:"claim_status"`                                                                                   // 0 未领取 1 NFT 2 zcloak 3 两者
 	NFTScanOwn
 }
 
