@@ -35,6 +35,7 @@ func Routers() *gin.Engine {
 		router.InitAccountRouter(v1Group)
 		router.InitSystemRouter(v1Group)
 		router.InitEnsRouter(v1Group)
+		router.InitZcloakRouter(v1Group)
 	}
 
 	global.LOG.Info("router register success")

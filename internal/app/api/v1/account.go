@@ -28,6 +28,7 @@ func GetCollectionByContract(c *gin.Context) {
 		}, "Success", c)
 	}
 }
+
 func GetCollection(c *gin.Context) {
 	var req request.GetCollectionReq
 	_ = c.ShouldBindQuery(&req)

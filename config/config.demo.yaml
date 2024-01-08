@@ -2,6 +2,7 @@
 system:
   env: develop
   addr: 8888
+  api-key: ""
 
 # pgsql configuration
 pgsql:

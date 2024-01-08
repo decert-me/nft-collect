@@ -57,12 +57,19 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 	}
 
 	if req.ContractID != "" {
-		var contract model.Contract
-		if err := global.DB.Model(&model.Contract{}).Where("id", req.ContractID).First(&contract).Error; err != nil {
-			global.LOG.Error("error first", zap.Error(err))
-			return total, totalPublic, totalHidden, res, err
+		// 两个合集放一起
+		if req.ContractID == "decert_badge" {
+			db.Where("collection.chain", "polygon").Where("collection.contract_address = '0xc8e9cd4921e54c4163870092ca8d9660e967b53d' OR collection.contract_address = '0x37da9ea159f5c95923ccc65ecae857c2584a899a'")
+		} else if req.ContractID == "decert_quest" {
+			db.Where("collection.chain", "polygon").Where("collection.contract_address = '0x813147e63c5b8fe2e8fb75df26f15186874b3901' OR collection.contract_address = '0x60f028c82f9f3bf71e0c13fe9e8e7f916b345c00'")
+		} else {
+			var contract model.Contract
+			if err := global.DB.Model(&model.Contract{}).Where("id", req.ContractID).First(&contract).Error; err != nil {
+				global.LOG.Error("error first", zap.Error(err))
+				return total, totalPublic, totalHidden, res, err
+			}
+			db.Where("collection.chain", contract.Chain).Where("collection.contract_address", contract.ContractAddress)
 		}
-		db.Where("collection.chain", contract.Chain).Where("collection.contract_address", contract.ContractAddress)
 	}
 	err = db.Count(&total).Error
 	if err != nil {
