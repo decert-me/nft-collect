@@ -69,6 +69,21 @@ func GetCollection(c *gin.Context) {
 				PageSize:    req.PageSize,
 			}, "Success", c)
 		}
+	} else if strings.HasPrefix(address, "did:zk:") {
+		req.AccountAddress = address
+		if total, totalPublic, totalHidden, list, err := service.GetZcloakCollection(req, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(response.GetCollectionRes{
+				List:        list,
+				Total:       total,
+				TotalPublic: totalPublic,
+				TotalHidden: totalHidden,
+				Page:        req.Page,
+				PageSize:    req.PageSize,
+			}, "Success", c)
+		}
 	} else {
 		response.FailWithMessage("地址错误", c)
 	}
@@ -89,6 +104,13 @@ func GetContract(c *gin.Context) {
 		//response.OkWithDetailed(nil, "Success", c)
 		//return
 		if list, err := service.GetSolanaContract(address, account); err != nil {
+			global.LOG.Error("Error!", zap.Error(err))
+			response.FailWithMessage("Error", c)
+		} else {
+			response.OkWithDetailed(list, "Success", c)
+		}
+	} else if strings.HasPrefix(address, "did:zk:") {
+		if list, err := service.GetZcloakContract(address, account); err != nil {
 			global.LOG.Error("Error!", zap.Error(err))
 			response.FailWithMessage("Error", c)
 		} else {

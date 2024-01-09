@@ -8,4 +8,5 @@ type SaveCardInfoRequest struct {
 	ImageURI        string `json:"image_uri" form:"image_uri" binding:"required"`
 	ErcType         string `json:"erc_type" form:"erc_type" binding:"required"`
 	Name            string `json:"name" form:"name" binding:"required"`
+	DidAddress      string `json:"did_address" form:"did_address" binding:"required"`
 }

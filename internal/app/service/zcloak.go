@@ -7,6 +7,7 @@ import (
 	"nft-collect/internal/app/global"
 	"nft-collect/internal/app/model"
 	"nft-collect/internal/app/model/request"
+	"strings"
 )
 
 // SaveCardInfo 保存Zcloak证书
@@ -40,7 +41,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		Chain:          r.Chain,
 		AccountAddress: r.AccountAddress,
 		Status:         2, // 显示
-		ClaimStatus:    1,
+		ClaimStatus:    2,
 		NFTScanOwn: model.NFTScanOwn{
 			ContractAddress: r.ContractAddress,
 			TokenID:         r.TokenID,
@@ -56,5 +57,22 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 	}
 	// 更新合约数量
 	updateContractCount(r.AccountAddress)
+	// 保存did和地址映射
+	var count int64
+	err = global.DB.Model(&model.ZcloakDid{}).Where("address = ?", r.AccountAddress).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count > 0 {
+		return
+	}
+	// 插入
+	err = global.DB.Create(&model.ZcloakDid{
+		Address:    strings.ToLower(r.AccountAddress),
+		DidAddress: r.DidAddress,
+	}).Error
+	if err != nil {
+		return
+	}
 	return nil
 }

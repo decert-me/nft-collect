@@ -28,6 +28,7 @@ func RegisterTables(db *gorm.DB) {
 		model.Ens{},
 		model.CollectionSolana{},
 		model.ContractSolana{},
+		model.ZcloakDid{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
