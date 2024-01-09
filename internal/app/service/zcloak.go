@@ -24,7 +24,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		Where("chain = ? AND account_address = ? AND contract_address = ? AND token_id = ?", r.Chain, r.AccountAddress, r.ContractAddress, r.TokenID).
 		First(&collectionRes)
 	// 已经领取，不需要操作
-	if collectionRes.ClaimStatus == 3 {
+	if collectionRes.ClaimStatus == 3 || collectionRes.ClaimStatus == 2 {
 		return
 	}
 	if collectionRes.ID != "" && collectionRes.ClaimStatus == 1 {
