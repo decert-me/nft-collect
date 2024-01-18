@@ -44,6 +44,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		ClaimStatus:    2,
 		NFTScanOwn: model.NFTScanOwn{
 			ContractAddress: r.ContractAddress,
+			ContractName:    "Decert Badge",
 			TokenID:         r.TokenID,
 			Owner:           r.AccountAddress,
 			Name:            r.Name,

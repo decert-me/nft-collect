@@ -340,7 +340,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	}
 	// 查询所有ZCloak证书NFT
 	var zCloakNFT []model.Collection
-	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND status = 2", address).Find(&zCloakNFT).Error; err != nil {
+	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND status = 2 AND contract_name='Decert Badge'", address).Find(&zCloakNFT).Error; err != nil {
 		return err
 	}
 	// 保存数据
@@ -352,6 +352,9 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	}
 	// 更改ZCloak证书状态
 	for _, v := range nft {
+		if v.ContractName != "Decert Badge" {
+			continue
+		}
 		var tokenID string
 		index := strings.Index(v.ExternalLink, "/quests/")
 		if index != -1 {
@@ -359,9 +362,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 			tokenID = v.ExternalLink[index+len("/quests/"):]
 		}
 		for _, z := range zCloakNFT {
-			if v.Chain == z.Chain && v.ContractAddress == z.ContractAddress && tokenID == z.TokenID {
-				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Update("status", 3).Error
-			} else if v.Chain != z.Chain && v.ContractAddress == z.ContractAddress && tokenID == z.TokenID {
+			if tokenID == z.TokenID {
 				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
 				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("status", 3).Error
 			}
