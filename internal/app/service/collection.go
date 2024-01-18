@@ -16,6 +16,7 @@ import (
 	"nft-collect/internal/app/model/request"
 	"nft-collect/internal/app/model/response"
 	"nft-collect/pkg/slice"
+	"strings"
 	"sync"
 	"time"
 )
@@ -351,10 +352,16 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	}
 	// 更改ZCloak证书状态
 	for _, v := range nft {
+		var tokenID string
+		index := strings.Index(v.ExternalLink, "/quests/")
+		if index != -1 {
+			// 提取数字部分
+			tokenID = v.ExternalLink[index+len("/quests/"):]
+		}
 		for _, z := range zCloakNFT {
-			if v.Chain == z.Chain && v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
+			if v.Chain == z.Chain && v.ContractAddress == z.ContractAddress && tokenID == z.TokenID {
 				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Update("status", 3).Error
-			} else if v.Chain != z.Chain && v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
+			} else if v.Chain != z.Chain && v.ContractAddress == z.ContractAddress && tokenID == z.TokenID {
 				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
 				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("status", 3).Error
 			}
