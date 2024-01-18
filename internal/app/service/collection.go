@@ -59,9 +59,9 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 	if req.ContractID != "" {
 		// 两个合集放一起
 		if req.ContractID == "decert_badge" {
-			db.Where("collection.contract_address = '0x176a6abbd7dfad4c66d297f40269f910538212b7' OR collection.contract_address = '0xeb475abdd91e07db399d33f801f5973c7e4b3610'")
+			db.Where("collection.contract_address = '0x176a6abbd7dfad4c66d297f40269f910538212b7' OR collection.contract_address = '0xc8e9cd4921e54c4163870092ca8d9660e967b53d'")
 		} else if req.ContractID == "decert_quest" {
-			db.Where("collection.contract_address = '0x373dcc48fa23451f792e604ba88c0bfff17781c8' OR collection.contract_address = '0xc8e9cd4921e54c4163870092ca8d9660e967b53d'")
+			db.Where("collection.contract_address = '0x373dcc48fa23451f792e604ba88c0bfff17781c8' OR collection.contract_address = '0xeb475abdd91e07db399d33f801f5973c7e4b3610'")
 		} else {
 			var contract model.Contract
 			if err := global.DB.Model(&model.Contract{}).Where("id", req.ContractID).First(&contract).Error; err != nil {

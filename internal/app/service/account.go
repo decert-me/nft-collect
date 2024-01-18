@@ -90,11 +90,11 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 					break
 				}
 				// 两个合集放一起：跳过
-				if c.ContractAddress == "0x176a6abbd7dfad4c66d297f40269f910538212b7" || c.ContractAddress == "0xeb475abdd91e07db399d33f801f5973c7e4b3610" {
+				if c.ContractAddress == "0x176a6abbd7dfad4c66d297f40269f910538212b7" || c.ContractAddress == "0xc8e9cd4921e54c4163870092ca8d9660e967b53d" {
 					twoCountBadge += contractMap[c.ID]
 					break
 				}
-				if c.ContractAddress == "0x373dcc48fa23451f792e604ba88c0bfff17781c8" || c.ContractAddress == "0xc8e9cd4921e54c4163870092ca8d9660e967b53d" {
+				if c.ContractAddress == "0x373dcc48fa23451f792e604ba88c0bfff17781c8" || c.ContractAddress == "0xeb475abdd91e07db399d33f801f5973c7e4b3610" {
 					twoCountQuest += contractMap[c.ID]
 					break
 				}
