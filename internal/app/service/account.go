@@ -80,8 +80,8 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 		return res, err
 	}
 
-	//var twoCountBadge int64 // 两个合集放一起
-	//var twoCountQuest int64 // 两个合集放一起
+	var twoCountBadge int64 // 两个合集放一起
+	var twoCountQuest int64 // 两个合集放一起
 	// order by contractIDs
 	for _, id := range contractIDs {
 		for _, c := range contract {
@@ -89,32 +89,32 @@ func GetContract(address, account string) (res []response.GetContractRes, err er
 				if contractMap[c.ID] == 0 {
 					break
 				}
-				//// 两个合集放一起：跳过
-				//if c.ContractAddress == "0xc8e9cd4921e54c4163870092ca8d9660e967b53d" || c.ContractAddress == "0x37da9ea159f5c95923ccc65ecae857c2584a899a" {
-				//	twoCountBadge += contractMap[c.ID]
-				//	break
-				//}
-				//if c.ContractAddress == "0x813147e63c5b8fe2e8fb75df26f15186874b3901" || c.ContractAddress == "0x60f028c82f9f3bf71e0c13fe9e8e7f916b345c00" {
-				//	twoCountQuest += contractMap[c.ID]
-				//	break
-				//}
+				// 两个合集放一起：跳过
+				if c.ContractAddress == "0x176a6abbd7dfad4c66d297f40269f910538212b7" || c.ContractAddress == "0xeb475abdd91e07db399d33f801f5973c7e4b3610" {
+					twoCountBadge += contractMap[c.ID]
+					break
+				}
+				if c.ContractAddress == "0x373dcc48fa23451f792e604ba88c0bfff17781c8" || c.ContractAddress == "0xc8e9cd4921e54c4163870092ca8d9660e967b53d" {
+					twoCountQuest += contractMap[c.ID]
+					break
+				}
 				res = append(res, response.GetContractRes{Contract: c, Count: contractMap[c.ID]})
 				break
 			}
 		}
 	}
-	//// 两个合集放一起：添加总信息
-	//if twoCountBadge > 0 {
-	//	res = append([]response.GetContractRes{
-	//		{model.Contract{MODEL: global.MODEL{ID: "decert_badge"}, ContractName: "Decert Badge", ContractAddress: "", ContractLogo: "ipfs://bafkreiedufqglo2o2shyv2kgvc4hn6j6uajzyrmebi7alowevbmpwhupwy", Chain: "polygon"}, twoCountBadge},
-	//	}, res...)
-	//}
-	//
-	//if twoCountQuest > 0 {
-	//	res = append([]response.GetContractRes{
-	//		{model.Contract{MODEL: global.MODEL{ID: "decert_quest"}, ContractName: "Decert Quest", ContractAddress: "", ContractLogo: "ipfs://bafkreiedufqglo2o2shyv2kgvc4hn6j6uajzyrmebi7alowevbmpwhupwy", Chain: "polygon"}, twoCountQuest},
-	//	}, res...)
-	//}
+	// 两个合集放一起：添加总信息
+	if twoCountBadge > 0 {
+		res = append([]response.GetContractRes{
+			{model.Contract{MODEL: global.MODEL{ID: "decert_badge"}, ContractName: "Decert Badge", ContractAddress: "", ContractLogo: "ipfs://bafkreiedufqglo2o2shyv2kgvc4hn6j6uajzyrmebi7alowevbmpwhupwy", Chain: ""}, twoCountBadge},
+		}, res...)
+	}
+
+	if twoCountQuest > 0 {
+		res = append([]response.GetContractRes{
+			{model.Contract{MODEL: global.MODEL{ID: "decert_quest"}, ContractName: "Decert Quest", ContractAddress: "", ContractLogo: "ipfs://bafkreiedufqglo2o2shyv2kgvc4hn6j6uajzyrmebi7alowevbmpwhupwy", Chain: ""}, twoCountQuest},
+		}, res...)
+	}
 
 	return res, err
 }

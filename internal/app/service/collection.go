@@ -59,9 +59,9 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 	if req.ContractID != "" {
 		// 两个合集放一起
 		if req.ContractID == "decert_badge" {
-			db.Where("collection.chain", "polygon").Where("collection.contract_address = '0xc8e9cd4921e54c4163870092ca8d9660e967b53d' OR collection.contract_address = '0x37da9ea159f5c95923ccc65ecae857c2584a899a'")
+			db.Where("collection.contract_address = '0x176a6abbd7dfad4c66d297f40269f910538212b7' OR collection.contract_address = '0xeb475abdd91e07db399d33f801f5973c7e4b3610'")
 		} else if req.ContractID == "decert_quest" {
-			db.Where("collection.chain", "polygon").Where("collection.contract_address = '0x813147e63c5b8fe2e8fb75df26f15186874b3901' OR collection.contract_address = '0x60f028c82f9f3bf71e0c13fe9e8e7f916b345c00'")
+			db.Where("collection.contract_address = '0x373dcc48fa23451f792e604ba88c0bfff17781c8' OR collection.contract_address = '0xc8e9cd4921e54c4163870092ca8d9660e967b53d'")
 		} else {
 			var contract model.Contract
 			if err := global.DB.Model(&model.Contract{}).Where("id", req.ContractID).First(&contract).Error; err != nil {
@@ -339,7 +339,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	}
 	// 查询所有ZCloak证书NFT
 	var zCloakNFT []model.Collection
-	if err = global.DB.Model(&model.Collection{}).Where("chain = ? AND account_address = ? AND status = 1", api.Chain, address).Find(&zCloakNFT).Error; err != nil {
+	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND status = 2", address).Find(&zCloakNFT).Error; err != nil {
 		return err
 	}
 	// 保存数据
@@ -352,8 +352,11 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	// 更改ZCloak证书状态
 	for _, v := range nft {
 		for _, z := range zCloakNFT {
-			if v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
+			if v.Chain == z.Chain && v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
 				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Update("status", 3).Error
+			} else if v.Chain != z.Chain && v.ContractAddress == z.ContractAddress && v.TokenID == z.TokenID {
+				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
+				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("status", 3).Error
 			}
 		}
 	}

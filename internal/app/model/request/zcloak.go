@@ -9,4 +9,5 @@ type SaveCardInfoRequest struct {
 	ErcType         string `json:"erc_type" form:"erc_type" binding:"required"`
 	Name            string `json:"name" form:"name" binding:"required"`
 	DidAddress      string `json:"did_address" form:"did_address" binding:"required"`
+	MetadataJson    string `json:"metadata_json" form:"metadata_json"`
 }

@@ -21,7 +21,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 	var collectionRes model.Collection
 	global.DB.
 		Select("id,claim_status").
-		Where("chain = ? AND account_address = ? AND contract_address = ? AND token_id = ?", r.Chain, r.AccountAddress, r.ContractAddress, r.TokenID).
+		Where("account_address = ? AND contract_address = ? AND token_id = ?", r.AccountAddress, r.ContractAddress, r.TokenID).
 		First(&collectionRes)
 	// 已经领取，不需要操作
 	if collectionRes.ClaimStatus == 3 || collectionRes.ClaimStatus == 2 {
@@ -49,6 +49,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 			Name:            r.Name,
 			ErcType:         r.ErcType,
 			ImageURI:        r.ImageURI,
+			MetadataJSON:    r.MetadataJson,
 		},
 	}
 	err = global.DB.Create(&collection).Error
