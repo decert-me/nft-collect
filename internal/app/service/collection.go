@@ -90,7 +90,7 @@ func GetCollection(req request.GetCollectionReq, account string) (total, totalPu
 	}
 
 	if req.Sort != "asc" && req.Sort != "desc" {
-		req.Sort = "asc"
+		req.Sort = "desc"
 	}
 	orderBy := fmt.Sprintf("mint_timestamp %s", req.Sort)
 	err = db.Limit(limit).Offset(offset).Order(orderBy).Find(&res).Error
@@ -147,7 +147,7 @@ func GetCollectionByContract(req request.GetCollectionReq) (total int64, res []m
 	if err != nil {
 		return total, res, err
 	}
-	err = db.Limit(limit).Offset(offset).Order("mint_timestamp asc").Find(&res).Error
+	err = db.Limit(limit).Offset(offset).Order("mint_timestamp desc").Find(&res).Error
 	if err != nil {
 		return total, res, err
 	}
@@ -338,35 +338,12 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	if len(nft) == 0 {
 		return nil
 	}
-	// 查询所有ZCloak证书NFT
-	var zCloakNFT []model.Collection
-	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND status = 2 AND contract_name='Decert Badge'", address).Find(&zCloakNFT).Error; err != nil {
-		return err
-	}
 	// 保存数据
 	if err = global.DB.Model(&model.Collection{}).Omit("status").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
 		UpdateAll: true,
 	}).Create(&nft).Error; err != nil {
 		return err
-	}
-	// 更改ZCloak证书状态
-	for _, v := range nft {
-		if v.ContractName != "Decert Badge" {
-			continue
-		}
-		var tokenID string
-		index := strings.Index(v.ExternalLink, "/quests/")
-		if index != -1 {
-			// 提取数字部分
-			tokenID = v.ExternalLink[index+len("/quests/"):]
-		}
-		for _, z := range zCloakNFT {
-			if tokenID == z.TokenID {
-				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
-				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("status", 3).Error
-			}
-		}
 	}
 	_ = errFlag
 	//if !errFlag {
@@ -465,12 +442,35 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 	if len(nft) == 0 {
 		return total, nil
 	}
+	// 查询所有ZCloak证书NFT
+	var zCloakNFT []model.Collection
+	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND claim_status = 2 AND contract_name='Decert Badge'", address).Find(&zCloakNFT).Error; err != nil {
+		return total, nil
+	}
 	// 保存数据
 	if err = global.DB.Model(&model.Collection{}).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
 		DoUpdates: clause.AssignmentColumns([]string{"name", "image_uri", "metadata_json"}),
 	}).Create(&nft).Error; err != nil {
 		return total, err
+	}
+	// 更改ZCloak证书状态
+	for _, v := range nft {
+		if v.ContractName != "Decert Badge" {
+			continue
+		}
+		var tokenID string
+		index := strings.Index(v.ExternalLink, "/quests/")
+		if index != -1 {
+			// 提取数字部分
+			tokenID = v.ExternalLink[index+len("/quests/"):]
+		}
+		for _, z := range zCloakNFT {
+			if tokenID == z.TokenID {
+				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
+				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("claim_status", 3).Error
+			}
+		}
 	}
 	_ = errFlag
 	// 删除非本人NFT

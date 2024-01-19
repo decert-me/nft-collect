@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nft-collect/internal/app/global"
 	"nft-collect/internal/app/model"
 	"nft-collect/internal/app/model/request"
 	"strings"
+	"time"
 )
 
 // SaveCardInfo 保存Zcloak证书
@@ -25,6 +27,17 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		First(&collectionRes)
 	// 已经领取，不需要操作
 	if collectionRes.ClaimStatus == 3 || collectionRes.ClaimStatus == 2 {
+		return
+	}
+	// 查询NFT是否存在
+	var collectionRes2 model.Collection
+	externalLink := fmt.Sprintf("https://decert.me/quests/%s", r.TokenID)
+	global.DB.
+		Select("id").
+		Where("account_address = ? AND contract_name='Decert Badge' AND external_link = ?", r.AccountAddress, externalLink).
+		First(&collectionRes2)
+	// 已经领取
+	if collectionRes2.ID != "" {
 		return
 	}
 	if collectionRes.ID != "" && collectionRes.ClaimStatus == 1 {
@@ -51,6 +64,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 			ErcType:         r.ErcType,
 			ImageURI:        r.ImageURI,
 			MetadataJSON:    r.MetadataJson,
+			MintTimestamp:   time.Now().UnixMilli(),
 		},
 	}
 	err = global.DB.Create(&collection).Error
