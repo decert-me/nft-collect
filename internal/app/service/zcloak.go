@@ -21,6 +21,23 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 		global.LOG.Error("非法请求", zap.String("x-api-key", c.GetHeader("x-api-key")))
 		return errors.New("非法请求")
 	}
+	// 保存did和地址映射
+	var count int64
+	err = global.DB.Model(&model.ZcloakDid{}).Where("address = ?", r.AccountAddress).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count > 0 {
+		return
+	}
+	// 插入
+	err = global.DB.Create(&model.ZcloakDid{
+		Address:    strings.ToLower(r.AccountAddress),
+		DidAddress: r.DidAddress,
+	}).Error
+	if err != nil {
+		return
+	}
 	// 查询NFT是否存在
 	var collectionRes model.Collection
 	global.DB.
@@ -85,23 +102,7 @@ func SaveCardInfo(c *gin.Context, r request.SaveCardInfoRequest) (err error) {
 	}
 	// 更新合约数量
 	updateContractCount(r.AccountAddress)
-	// 保存did和地址映射
-	var count int64
-	err = global.DB.Model(&model.ZcloakDid{}).Where("address = ?", r.AccountAddress).Count(&count).Error
-	if err != nil {
-		return
-	}
-	if count > 0 {
-		return
-	}
-	// 插入
-	err = global.DB.Create(&model.ZcloakDid{
-		Address:    strings.ToLower(r.AccountAddress),
-		DidAddress: r.DidAddress,
-	}).Error
-	if err != nil {
-		return
-	}
+
 	return nil
 }
 
