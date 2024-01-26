@@ -3,7 +3,7 @@ module nft-collect
 go 1.19
 
 require (
-	github.com/blocto/solana-go-sdk v1.26.0
+	filippo.io/edwards25519 v1.0.0-rc.1
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
@@ -12,6 +12,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/imroc/req/v3 v3.32.0
 	github.com/lib/pq v1.10.7
+	github.com/mr-tron/base58 v1.2.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.15.0
@@ -19,12 +20,12 @@ require (
 	github.com/wealdtech/go-ens/v3 v3.5.5
 	go.uber.org/zap v1.24.0
 	golang.org/x/exp v0.0.0-20230206171751-46f607a40771
-	gorm.io/driver/postgres v1.4.7
-	gorm.io/gorm v1.24.6
+	gorm.io/datatypes v1.2.0
+	gorm.io/driver/postgres v1.5.0
+	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
 
 require (
-	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -35,6 +36,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
@@ -48,7 +50,7 @@ require (
 	github.com/ipfs/go-cid v0.2.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/pgx/v5 v5.2.0 // indirect
+	github.com/jackc/pgx/v5 v5.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -60,7 +62,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.0.3 // indirect
 	github.com/multiformats/go-base36 v0.1.0 // indirect
 	github.com/multiformats/go-multibase v0.1.1 // indirect
@@ -101,5 +102,6 @@ require (
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.4.7 // indirect
 	lukechampine.com/blake3 v1.1.6 // indirect
 )

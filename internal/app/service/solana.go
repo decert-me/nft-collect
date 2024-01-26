@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 	"nft-collect/internal/app/global"
 	"nft-collect/internal/app/model"
+	"strings"
 	"sync"
 	"time"
 )
@@ -93,6 +94,36 @@ func SolanaGet() (err error) {
 		UpdateAll: true,
 	}).Create(&nft).Error; err != nil {
 		return err
+	}
+	// 更改ZCloak证书状态
+	for _, v := range nft {
+		if v.Collection != "Decert Badge" {
+			continue
+		}
+		var tokenID string
+		index := strings.Index(v.ExternalLink, "/quests/")
+		if index != -1 {
+			// 提取数字部分
+			tokenID = v.ExternalLink[index+len("/quests/"):]
+		}
+		// 查询所有ZCloak证书NFT
+		var zCloakNFT []model.CollectionSolana
+		if err = global.DB.Model(&model.CollectionSolana{}).Where("minter = ? AND claim_status = 2 AND collection='Decert Badge'", v.Minter).Find(&zCloakNFT).Error; err != nil {
+			return nil
+		}
+		for _, z := range zCloakNFT {
+			var tokenIDZCloak string
+			indexZCloak := strings.Index(v.ExternalLink, "/quests/")
+			if indexZCloak != -1 {
+				// 提取数字部分
+				tokenIDZCloak = z.ExternalLink[indexZCloak+len("/quests/"):]
+			}
+
+			if tokenID == tokenIDZCloak {
+				_ = global.DB.Model(&model.Collection{}).Where("id", z.ID).Delete(&model.Collection{}).Error
+				_ = global.DB.Model(&model.Collection{}).Where("id", v.ID).Update("claim_status", 3).Error
+			}
+		}
 	}
 	_ = errFlag
 	return nil
