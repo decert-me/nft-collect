@@ -173,7 +173,7 @@ func RefreshUserData(c *gin.Context) {
 		service.RefreshUserDataSolana()
 		response.OkWithMessage("Success", c)
 	} else {
-		response.FailWithMessage("地址错误", c)
+		response.OkWithMessage("Success", c)
 	}
 
 }
