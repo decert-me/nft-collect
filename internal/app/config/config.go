@@ -7,4 +7,5 @@ type Server struct {
 	Pgsql Pgsql `mapstructure:"pgsql" json:"pgsql" yaml:"pgsql"`
 	NFT   NFT   `mapstructure:"nft" json:"nft" yaml:"nft"`
 	JWT   JWT   `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
+	IPFS  IPFS  `mapstructure:"ipfs" json:"ipfs" yaml:"ipfs"`
 }

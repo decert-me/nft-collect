@@ -338,6 +338,18 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	if len(nft) == 0 {
 		return nil
 	}
+	// content type处理
+	clientContentType := req.C().SetTimeout(15 * time.Second).DisableAutoReadResponse()
+	for i, v := range nft {
+		if v.ContentType == "unknown" && (v.ImageURI[0] == 'Q' || v.ImageURI[0] == 'b') {
+			res, err := clientContentType.R().Get(fmt.Sprintf("%s/%s", global.CONFIG.IPFS.URL, v.ImageURI))
+			if err != nil {
+				continue
+			}
+			fmt.Println(fmt.Sprintf("%s/%s", global.CONFIG.IPFS.URL, v.ImageURI))
+			nft[i].ContentType = res.GetHeader("Content-Type")
+		}
+	}
 	// 保存数据
 	if err = global.DB.Model(&model.Collection{}).Omit("status").Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
@@ -409,13 +421,13 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 	reqUrl := assetsUrl
 	fmt.Println(reqUrl)
 
-	req, errReq := client.R().Get(assetsUrl)
+	result, errReq := client.R().Get(assetsUrl)
 	if errReq != nil {
 		tryTimes += 1
 		errFlag = true
 	}
-	req.ErrorResult()
-	res := req.String()
+	result.ErrorResult()
+	res := result.String()
 
 	if gjson.Get(res, "code").String() != "200" {
 		tryTimes += 1
@@ -442,6 +454,19 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 	if len(nft) == 0 {
 		return total, nil
 	}
+	// content type处理
+	clientContentType := req.C().SetTimeout(15 * time.Second).DisableAutoReadResponse()
+	for i, v := range nft {
+		if v.ContentType == "unknown" && (v.ImageURI[0] == 'Q' || v.ImageURI[0] == 'b') {
+			res, err := clientContentType.R().Get(fmt.Sprintf("%s/%s", global.CONFIG.IPFS.URL, v.ImageURI))
+			if err != nil {
+				continue
+			}
+			fmt.Println(fmt.Sprintf("%s/%s", global.CONFIG.IPFS.URL, v.ImageURI))
+
+			nft[i].ContentType = res.GetHeader("Content-Type")
+		}
+	}
 	// 查询所有ZCloak证书NFT
 	var zCloakNFT []model.Collection
 	if err = global.DB.Model(&model.Collection{}).Where("account_address = ? AND claim_status = 2 AND contract_name='Decert Badge'", address).Find(&zCloakNFT).Error; err != nil {
@@ -450,7 +475,7 @@ func addAllCollection(address string, api config.APIConfig, contract string) (to
 	// 保存数据
 	if err = global.DB.Model(&model.Collection{}).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chain"}, {Name: "account_address"}, {Name: "contract_address"}, {Name: "token_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"name", "image_uri", "metadata_json"}),
+		DoUpdates: clause.AssignmentColumns([]string{"name", "image_uri", "metadata_json", "content_type"}),
 	}).Create(&nft).Error; err != nil {
 		return total, err
 	}

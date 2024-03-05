@@ -73,3 +73,6 @@ nft:
       chain-id: 100
       api-per-host: "gnosisapi"
       symbol: "XDAI"
+
+ipfs:
+  url: "https://dweb.link/ipfs"
