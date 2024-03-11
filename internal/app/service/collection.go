@@ -284,12 +284,7 @@ func addCollectionByContract(wg *sync.WaitGroup, address string, erc_type string
 	client := req.C().SetTimeout(120*time.Second).
 		SetCommonRetryCount(1).
 		SetUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36").
-		SetCommonHeader("Referer", "https://docs.nftscan.com/")
-	if erc_type == "erc721" {
-		client.SetCommonHeader("X-API-KEY", global.CONFIG.NFT.ApiKey)
-	} else {
-		client.SetCommonHeader("X-API-KEY", global.CONFIG.NFT.ApiKeyBackup)
-	}
+		SetCommonHeader("Referer", "https://docs.nftscan.com/").SetCommonHeader("X-API-KEY", global.CONFIG.NFT.ApiKey)
 	i := 0
 	for {
 		fmt.Println("i", i)

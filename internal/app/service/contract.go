@@ -56,7 +56,7 @@ func ItemFiltrateAndDown(contractMap map[string]struct{}, api config.APIConfig) 
 // @param: contractAddress []string, api config.APIConfig
 // @return: res []model.NFTContract
 func downloadItem(contractAddress []string, api config.APIConfig) (res []model.Contract) {
-	client := req.C().SetCommonHeader("X-API-KEY", global.CONFIG.NFT.ApiKeyPro)
+	client := req.C().SetCommonHeader("X-API-KEY", global.CONFIG.NFT.ApiKey)
 	clientDown := req.C()
 	for _, address := range contractAddress {
 		url := fmt.Sprintf("https://%s.nftscan.com/api/v2/collections/%s?show_attribute=false", api.APIPreHost, address)
