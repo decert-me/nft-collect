@@ -39,7 +39,7 @@ local:
   path: 'uploads/file'
   ipfs: 'uploads/ipfs'
 
-# nft
+# nft configuration
 nft:
   ens-rpc: "https://rpc.ankr.com/eth"
   api-key: ""
@@ -71,5 +71,6 @@ nft:
       api-per-host: "gnosisapi"
       symbol: "XDAI"
 
+# ipfs configuration
 ipfs:
   url: "https://dweb.link/ipfs"
