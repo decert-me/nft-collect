@@ -43,11 +43,8 @@ local:
 nft:
   ens-rpc: "https://rpc.ankr.com/eth"
   api-key: ""
-  api-key-backup: ""
-  api-key-pro: ""
   cache-time: 15
   logo-path: "assets"
-  def-contract: ["0x37da9ea159f5c95923ccc65ecae857c2584a899a::polygon","0x8cc6517e45db7a0803fef220d9b577326a12033f::eth","0x2723522702093601e6360cae665518c4f63e9da6::bnb"]
   api-config:
     - chain: "eth"
       chain-id: 1
