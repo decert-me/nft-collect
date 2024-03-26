@@ -29,7 +29,9 @@ system:
 ```
 
 env：运行环境，可选值为 develop、test、production
+
 addr：运行端口
+
 api-key：Zcloak 证书生成调用 API Key
 
 ### 数据库配置
@@ -54,17 +56,29 @@ pgsql:
 ```
 
 path：数据库地址
+
 port：数据库端口
+
 config：数据库配置
+
 db-name：数据库名称
+
 username：数据库用户名
+
 password：数据库密码
+
 auto-migrate：是否自动迁移数据库
+
 prefix：数据库表前缀
+
 slow-threshold：慢查询阈值，单位毫秒
+
 max-idle-conns：最大空闲连接数
+
 max-open-conns：最大连接数
+
 log-mode：日志级别
+
 log-zap：是否使用zap日志库
 
 ### 日志级别配置
@@ -85,13 +99,21 @@ log:
 ```
 
 level：日志级别 debug、info、warn、error、dpanic、panic、fatal
+
 save：是否保存日志
+
 format：日志格式
+
 log-in-console：是否在控制台输出日志
+
 prefix：日志前缀
+
 director：日志保存路径
+
 show-line：是否显示行号
+
 encode-level：日志编码级别
+
 stacktrace-key：堆栈信息
 
 
@@ -110,7 +132,9 @@ auth:
 ```
 
 signing-key：签名密钥
+
 expires-time：过期时间，单位秒
+
 issuer：签发人
 
 ### 文件上传配置
@@ -125,6 +149,7 @@ local:
 ```
 
 path：本地文件保存路径
+
 ipfs：IPFS文件保存路径
 
 ### NFT 配置
@@ -146,12 +171,19 @@ nft:
 ```
 
 ens-rpc：获取 ENS RPC 地址
+
 api-key：API Key
+
 cache-time：NFT 数据缓存时间
+
 logo-path：NFT 项目图标保存路径
+
 chain：链名称
+
 chain-id：链 ID
+
 api-per-host：NFTScan API 名称
+
 symbol：链符号
 
 
