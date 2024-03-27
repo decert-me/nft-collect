@@ -16,6 +16,11 @@ cp ./config/config.demo.yaml ./config/config.yaml
 vi ./config/config.yaml
 ```
 
+## 运行
+```bash
+./nft-collect
+```
+
 ## 接口文档
 
 [接口文档](https://console-docs.apipost.cn/preview/204e9baea36e4549/a117971bf7373bca)
@@ -202,8 +207,3 @@ ipfs:
 ```
 
 url：IPFS 网关地址
-
-## 运行
-```bash
-./nft-collect
-```
