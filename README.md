@@ -1,6 +1,6 @@
 # nft-collect
 ![](https://img.shields.io/badge/license-MIT-green)
-[![goreportcard for backend-go](https://goreportcard.com/badge/github.com/decert-me/nft-collect)](https://goreportcard.com/report/github.com/decert-me/nft-collect)
+
 ## 安装
 ```bash
 git clone https://github.com/decert-me/nft-collect.git
@@ -15,6 +15,10 @@ go build
 cp ./config/config.demo.yaml ./config/config.yaml
 vi ./config/config.yaml
 ```
+
+## 接口文档
+
+[接口文档](https://console-docs.apipost.cn/preview/204e9baea36e4549/a117971bf7373bca)
 
 ### 运行配置
 
@@ -32,7 +36,7 @@ env：运行环境，可选值为 develop、test、production
 
 addr：运行端口
 
-api-key：Zcloak 证书生成调用 API Key
+api-key：服务接口 API Key 由 [decert backend](https://github.com/decert-me/admin/tree/main/backend) 调用
 
 ### 数据库配置
 
@@ -172,7 +176,7 @@ nft:
 
 ens-rpc：获取 ENS RPC 地址
 
-api-key：API Key
+api-key：NFTScan API Key [NFTScan Guides](https://docs.nftscan.com/guides/Overview/1)
 
 cache-time：NFT 数据缓存时间
 
