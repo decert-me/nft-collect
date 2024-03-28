@@ -1,6 +1,8 @@
 # nft-collect
 ![](https://img.shields.io/badge/license-MIT-green)
 
+Decert 认证页面接口
+
 ## 安装
 ```bash
 git clone https://github.com/decert-me/nft-collect.git
